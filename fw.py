@@ -151,14 +151,48 @@ class Firewall:
         return
 
 
-    def check_ip(self, rule_ip, packet_ip):
+    def ip_to_binary(self, ip):
+        """ Convert an ip address to binary """
+
+        ip_binary = ""
+
+        # split into octets
+        ip = ip.split(".")
+        range = ip[3].split("/")
+        ip[3] = range[0]
+
+        # go through each octet
+        for octet in ip:
+            # convert to binary
+            octet_binary = bin(int(octet))[2:]
+
+            ip_binary += octet_binary
+
+        # convert range to binary
+        if range[0] != range[-1]:
+            range = bin(int(range[1]))[2:]
+        else:
+            range = '0'
+
+        # return the binary
+        return (ip_binary, range)
+
+    def check_ip(self, rule_ip, pckt_ip):
         """ Check is IP is in the rule """
 
+        # the rule captures any IP packet
         if rule_ip == "*":
             return True
 
-        rule_ip = rule_ip.split(".")
-        
+        # convert rule ip to binary
+        rule_ip = self.ip_to_binary(rule_ip)
+        rule_ip = rule_ip[0]
+        rule_range = rule_ip[1]
+
+        # convert packet ip to binary
+        pckt_ip = self.ip_to_binary(pckt_ip)
+        pckt_ip = pckt_ip[0]
+        pckt_ip = pckt_ip[1]
 
         return
 
