@@ -109,7 +109,6 @@ class Firewall:
 
                 # rule is not valid
                 else:
-                    # print(rule_data)
                     sys.stderr.write(str(count) + " Warning: An invalid rule was encountered\n")
 
         return
@@ -141,8 +140,7 @@ class Firewall:
 
         # go through each rule
         for rule in self.RULES:
-            print("DEBUG ")
-            print(rule)
+            print("DEBUG r-p " + rule['ip'] + "\t" + packet['ip'])
 
             # check if same direction
             if rule['direction'] != packet['direction']:
@@ -150,7 +148,11 @@ class Firewall:
 
             # check if ip is in the rule
             if self.check_ip(rule['ip'], packet['ip']):
-                sys.stdout.write("DEBUG ip matches\n")
+                sys.stdout.write("DEBUG ip match\n\n")
+
+                break
+            else:
+                sys.stdout.write("DEBUG no match\n\n")
 
         return
 
@@ -163,7 +165,7 @@ class Firewall:
         count = mask
 
         # compute each octet
-        while count >= 0:
+        while count > 0:
             if mask -8 >= 0:
                 mask_binary.append(255)
                 count -= 8
@@ -195,10 +197,16 @@ class Firewall:
 
         pckt = []
 
-        for x in range(0,len(rule_ip)-1):
+        for x in range(0,len(rule_ip)):
 
             # AND the mask and packet ip address
             pckt.append(pckt_ip[x] & rule_mask[x])
+            rule_ip[x] = rule_ip[x] & rule_mask[x]
+
+        # print("DEBUG checking")
+        # print(pckt)
+        # print(rule_ip)
+        # print(rule_mask)
 
         # check if network portions are equal
         return pckt == rule_ip
