@@ -146,8 +146,6 @@ class Firewall:
 
         # go through each rule
         for rule in self.RULES:
-            print("DEBUG r-p " + rule['ip'] + "\t" + packet['ip'])
-
             # check if same direction
             if rule['direction'] != packet['direction']:
                 flag = False
@@ -164,7 +162,18 @@ class Firewall:
             if not rule['established'] == packet['established']:
                 flag = False
 
-        return flag
+        if flag:
+
+            print("DEBUG match")
+        else:
+            print("no match")
+
+
+        print(rule)
+        print(packet)
+
+
+        return
 
 
     def mask_to_octet(self, mask):
