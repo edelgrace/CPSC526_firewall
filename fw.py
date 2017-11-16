@@ -76,7 +76,11 @@ class Firewall:
         action = str(rule[1])
         ip = str(rule[2])
         ports = str(rule[3]).split(",")
-        established = str(rule[-1])
+        
+        if established == rule[-1]:
+            established = 0
+        else:
+            established = 1
 
         # create a dict out of the the rule
         dict = {'ip': ip,
@@ -138,23 +142,29 @@ class Firewall:
     def check_rule(self, packet):
         """ check packet against rule """
 
+        flag = True
+
         # go through each rule
         for rule in self.RULES:
             print("DEBUG r-p " + rule['ip'] + "\t" + packet['ip'])
 
             # check if same direction
             if rule['direction'] != packet['direction']:
-                pass
+                flag = False
 
             # check if ip is in the rule
-            if self.check_ip(rule['ip'], packet['ip']):
-                sys.stdout.write("DEBUG ip match\n\n")
+            if not self.check_ip(rule['ip'], packet['ip']):
+                flag = False
 
-                break
-            else:
-                sys.stdout.write("DEBUG no match\n\n")
+            # check if port is same
+            if not self.check_port(rule['port'], packet['port']):
+                flag = False
 
-        return
+            # check if established
+            if not rule['established'] == packet['established']:
+                flag = False
+
+        return flag
 
 
     def mask_to_octet(self, mask):
@@ -210,6 +220,17 @@ class Firewall:
 
         # check if network portions are equal
         return pckt == rule_ip
+
+
+    def check_port(self, rule_port, pckt_port):
+        """ Check ports """
+
+        if rule_port == "*":
+            return True
+
+        rule_port = rule_port.split(,)
+
+        return pckt_port in rule_port
 
 
     def ip_range(self, ip):
