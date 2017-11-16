@@ -177,6 +177,33 @@ class Firewall:
         return mask_binary
 
 
+    def check_ip(self, rule_ip, pckt_ip):
+        """ Check is IP is in the rule """
+
+        # the rule captures any IP packet
+        if rule_ip == "*":
+            return True
+
+        # convert rule ip to lists
+        rule_ip = self.ip_range(rule_ip)
+        rule_mask = rule_ip[1]
+        rule_ip = rule_ip[0]
+
+        # convert packet ip to lists
+        pckt_ip = self.ip_range(pckt_ip)
+        pckt_ip = pckt_ip[0]
+
+        pckt = []
+
+        for x in range(0,len(rule_ip)-1):
+
+            # AND the mask and packet ip address
+            pckt.append(pckt_ip[x] & rule_mask[x])
+
+        # check if network portions are equal
+        return pckt == rule_ip
+
+
     def ip_range(self, ip):
         """ Convert an ip address to octets """
 
@@ -198,34 +225,6 @@ class Firewall:
 
         # return the binary
         return [ip_addr, mask]
-
-
-    def check_ip(self, rule_ip, pckt_ip):
-        """ Check is IP is in the rule """
-
-        # the rule captures any IP packet
-        if rule_ip == "*":
-            return True
-
-        # convert rule ip to binary
-        rule_ip = self.ip_range(rule_ip)
-        rule_mask = rule_ip[1]
-        rule_ip = rule_ip[0]
-
-        # convert packet ip to binary
-        pckt_ip = self.ip_range(pckt_ip)
-        pckt_ip = pckt_ip[0]
-        pckt_mask = pckt_ip[1]
-
-        rule = []
-
-        for x in range(0,len(rule_ip)-1):
-            rule_ip[x] = rule_ip[x] & rule_mask[x]
-
-        sys.stdout.write("DEBUG ")
-        print(rule_ip)
-
-        return
 
 
     def run(self):
