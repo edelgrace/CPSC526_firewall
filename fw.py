@@ -9,7 +9,7 @@ import argparse
 class Firewall:
     """ Class for the firewall """
 
-    RULES = {}
+    RULES = []
 
     def parse_args(self):
         """ Parse the arguments """
@@ -26,7 +26,7 @@ class Firewall:
 
         return filename
 
-    def valid_rule(self, rule):
+    def valid_rule(self, rule)
         """ Check if the rule is valid """
         flag = True
 
@@ -67,6 +67,27 @@ class Firewall:
         return flag
 
 
+        d
+
+
+    def rule_to_dict(self, rule):
+        """ Convert rule to dictionary """
+
+        direction = str(rule[0])
+        action = str(rule[1])
+        ip = str(rule[2])
+        ports = str(rule[3]).split(",")
+        established = str(rule[-1])
+
+        # create a dict out of the the rule
+        dict = {'ip': ip,
+                'direction': direction,
+                'ports' = ports,
+                'flag' = established
+            }
+
+        return dict
+
     def parse_file(self, filename):
         """ Parse the file """
 
@@ -78,16 +99,20 @@ class Firewall:
                 # split line with whitespace
                 rule_data = line.strip().split()
 
+                # rule is valid
+                if  self.valid_rule(rule_data):
+                    count += 1
+
+                    # add to rule list
+                    rule = self.rule_to_dict(rule)
+                    self.RULES.append(rule)
+
                 # rule is not valid
-                if not self.valid_rule(rule_data):
+                else:
+                    # print(rule_data)
                     sys.stderr.write(str(count) + " Warning: An invalid rule was encountered\n")
 
-                # rule is valid
-                else:
-                    # TODO
-                    # print(rule_data)
-
-                    count += 1
+        print(self.RULES)
 
         return
 
