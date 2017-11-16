@@ -188,6 +188,7 @@ class Firewall:
         # return the binary
         return (ip_binary, mask)
 
+
     def check_ip(self, rule_ip, pckt_ip):
         """ Check is IP is in the rule """
 
@@ -203,7 +204,7 @@ class Firewall:
         # convert packet ip to binary
         pckt_ip = self.ip_to_binary(pckt_ip)
         pckt_ip = pckt_ip[0]
-        pckt_ip = pckt_ip[1]
+        pckt_range = pckt_ip[1]
 
         return
 
