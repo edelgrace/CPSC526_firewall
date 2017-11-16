@@ -26,6 +26,7 @@ class Firewall:
 
         return filename
 
+
     def valid_rule(self, rule):
         """ Check if the rule is valid """
         flag = True
@@ -136,10 +137,14 @@ class Firewall:
 
         return dict
 
+
     def check_rule(self, packet):
         """ check packet against rule """
 
+        # go through each rule
         for rule in self.RULES:
+
+            # check if ip is in the rule
             if self.check_ip(rule['ip'], packet['ip']):
                 sys.stdout.write("DEBUG ip matches")
                 
@@ -147,7 +152,16 @@ class Firewall:
 
 
     def check_ip(self, rule_ip, packet_ip):
+        """ Check is IP is in the rule """
+
+        if rule_ip == "*":
+            return True
+
+        rule_ip = rule_ip.split(".")
+        
+
         return
+
 
     def run(self):
         """ run the program """
