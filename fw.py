@@ -26,7 +26,7 @@ class Firewall:
 
         return filename
 
-    def valid_rule(self, rule)
+    def valid_rule(self, rule):
         """ Check if the rule is valid """
         flag = True
 
@@ -82,11 +82,12 @@ class Firewall:
         # create a dict out of the the rule
         dict = {'ip': ip,
                 'direction': direction,
-                'ports' = ports,
-                'flag' = established
+                'ports': ports,
+                'flag': established
             }
 
         return dict
+
 
     def parse_file(self, filename):
         """ Parse the file """
@@ -104,7 +105,7 @@ class Firewall:
                     count += 1
 
                     # add to rule list
-                    rule = self.rule_to_dict(rule)
+                    rule = self.rule_to_dict(rule_data)
                     self.RULES.append(rule)
 
                 # rule is not valid
@@ -112,22 +113,56 @@ class Firewall:
                     # print(rule_data)
                     sys.stderr.write(str(count) + " Warning: An invalid rule was encountered\n")
 
-        print(self.RULES)
+        return
 
+
+    def parse_packet(self, packet):
+        """ parse packet """
+
+        # split packet
+        packet = packet.strip().split()
+
+        direction = str(packet[0])
+        ip = str(packet[1])
+        port = int(packet[2])
+        flag = int(packet[3])
+
+        dict = {
+            'direction': direction,
+            'ip': ip,
+            'port': port,
+            'flag': flag    
+        }
+
+        return dict
+
+    def check_rule(self, packet):
+        """ check packet against rule """
+
+        for rule in self.RULES:
+            if self.check_ip(rule['ip'], packet['ip']):
+                sys.stdout.write("DEBUG ip matches")
+                
+        return
+
+
+    def check_ip(self, rule_ip, packet_ip):
         return
 
     def run(self):
+        """ run the program """
         # parse the arguments
         filename = self.parse_args()
 
         # parse the firewall rules
         self.parse_file(filename)
 
-
         # parse stdin
         for line in sys.stdin:
-            # TODO
-            print(line)
+            # parse the line
+            packet = self.parse_packet(line)
+
+            result = self.check_rule(packet)
     
         return
 
