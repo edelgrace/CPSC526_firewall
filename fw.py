@@ -4,6 +4,7 @@ import os
 import sys
 import time
 import datetime
+import argparse
 
 class Firewall:
     """ Class for the firewall """
