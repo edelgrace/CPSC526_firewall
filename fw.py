@@ -151,6 +151,17 @@ class Firewall:
         return
 
 
+    def mask_to_binary(self, mask):
+        """ Convert mask to binary """
+
+        # mask corresponds to number of ones
+        mask_binary = "1" * int(mask)
+
+        # append zeroes
+        mask_binary += "0" * (32-int(mask))
+
+        return mask_binary
+
     def ip_to_binary(self, ip):
         """ Convert an ip address to binary """
 
@@ -170,12 +181,12 @@ class Firewall:
 
         # convert range to binary
         if range[0] != range[-1]:
-            range = bin(int(range[1]))[2:]
+            mask = self.mask_to_binary(range[1])
         else:
-            range = '0'
+            mask = '11111111111111111111111111111111'
 
         # return the binary
-        return (ip_binary, range)
+        return (ip_binary, mask)
 
     def check_ip(self, rule_ip, pckt_ip):
         """ Check is IP is in the rule """
