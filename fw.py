@@ -3,6 +3,7 @@
 import os
 import sys
 import time
+import math
 import datetime
 import argparse
 
@@ -66,9 +67,6 @@ class Firewall:
             flag = False
 
         return flag
-
-
-        d
 
 
     def rule_to_dict(self, rule):
@@ -143,50 +141,63 @@ class Firewall:
 
         # go through each rule
         for rule in self.RULES:
+            print("DEBUG ")
+            print(rule)
+
+            # check if same direction
+            if rule['direction'] != packet['direction']:
+                pass
 
             # check if ip is in the rule
             if self.check_ip(rule['ip'], packet['ip']):
-                sys.stdout.write("DEBUG ip matches")
-                
+                sys.stdout.write("DEBUG ip matches\n")
+
         return
 
 
-    def mask_to_binary(self, mask):
+    def mask_to_octet(self, mask):
         """ Convert mask to binary """
 
-        # mask corresponds to number of ones
-        mask_binary = "1" * int(mask)
+        mask_binary = []
+        mask = int(mask)
+        count = mask
 
-        # append zeroes
-        mask_binary += "0" * (32-int(mask))
+        # compute each octet
+        while count >= 0:
+            if mask -8 >= 0:
+                mask_binary.append(255)
+                count -= 8
+            else:
+                mask_binary.append(math.pow(2, count))
+
+        # add 0s
+        while len(mask_binary) < 4:
+            mask_binary.append(0)
 
         return mask_binary
 
-    def ip_to_binary(self, ip):
-        """ Convert an ip address to binary """
 
-        ip_binary = ""
+    def ip_range(self, ip):
+        """ Convert an ip address to octets """
+
+        ip_addr = []
 
         # split into octets
         ip = ip.split(".")
         range = ip[3].split("/")
         ip[3] = range[0]
 
-        # go through each octet
         for octet in ip:
-            # convert to binary
-            octet_binary = bin(int(octet))[2:]
+            ip_addr.append(int(octet))
 
-            ip_binary += octet_binary
-
-        # convert range to binary
+        # convert range to octet
         if range[0] != range[-1]:
-            mask = self.mask_to_binary(range[1])
+            mask = self.mask_to_octet(range[1])
         else:
-            mask = '11111111111111111111111111111111'
+            mask = [255,255,255,255]
 
         # return the binary
-        return (ip_binary, mask)
+        return [ip_addr, mask]
 
 
     def check_ip(self, rule_ip, pckt_ip):
@@ -197,14 +208,22 @@ class Firewall:
             return True
 
         # convert rule ip to binary
-        rule_ip = self.ip_to_binary(rule_ip)
+        rule_ip = self.ip_range(rule_ip)
+        rule_mask = rule_ip[1]
         rule_ip = rule_ip[0]
-        rule_range = rule_ip[1]
 
         # convert packet ip to binary
-        pckt_ip = self.ip_to_binary(pckt_ip)
+        pckt_ip = self.ip_range(pckt_ip)
         pckt_ip = pckt_ip[0]
-        pckt_range = pckt_ip[1]
+        pckt_mask = pckt_ip[1]
+
+        rule = []
+
+        for x in range(0,len(rule_ip)-1):
+            rule_ip[x] = rule_ip[x] & rule_mask[x]
+
+        sys.stdout.write("DEBUG ")
+        print(rule_ip)
 
         return
 
