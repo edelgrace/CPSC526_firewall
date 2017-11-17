@@ -183,6 +183,8 @@ class Firewall:
                 no_match = False
 
                 break
+
+            # reset the flag
             else:
                 flag = True
 
@@ -192,12 +194,6 @@ class Firewall:
             msg += "\n"
 
             sys.stdout.write(msg)
-
-            # print(rule)
-            # print(packet)
-            # print("")
-
-
 
         return
 
@@ -211,11 +207,12 @@ class Firewall:
 
         # compute each octet
         while count > 0:
-            if mask -8 >= 0:
+            if count -8 >= 0:
                 mask_binary.append(255)
                 count -= 8
             else:
-                mask_binary.append(math.pow(2, count))
+                mask_binary.append(int(math.pow(2, count)))
+                count -=8
 
         # add 0s
         while len(mask_binary) < 4:
@@ -249,9 +246,11 @@ class Firewall:
             rule_ip[x] = rule_ip[x] & rule_mask[x]
 
         # print("DEBUG checking")
-        # print(pckt)
-        # print(rule_ip)
-        # print(rule_mask)
+        # if pckt != rule_ip:
+        #     print(pckt)
+        #     print(rule_ip)
+        #     print(rule_mask)
+        #     print("")
 
         # check if network portions are equal
         return pckt == rule_ip
