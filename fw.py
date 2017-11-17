@@ -167,7 +167,7 @@ class Firewall:
                 # print("DEBUG port")
 
             # check if established
-            if rule['established'] != packet['established'] or rule['established'] != 0:
+            if rule['established'] != packet['established'] and rule['established'] != 0:
                 flag = False
                 # print("DEBUG flag")
 
@@ -303,8 +303,6 @@ class Firewall:
 
         # parse the firewall rules
         self.parse_file(filename)
-
-        print(self.RULES)
 
         # parse stdin
         for line in sys.stdin:
