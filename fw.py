@@ -153,23 +153,19 @@ class Firewall:
         for rule in self.RULES:
             # check if same direction
             if rule['direction'] != packet['direction']:
-                # print("DEBUG direction")
                 flag = False
 
             # check if ip is in the rule
             if not self.check_ip(rule['ip'], packet['ip']):
                 flag = False
-                # print("DEBUG IP")
 
             # check if port is same
             if not self.check_port(rule['port'], packet['port']):
                 flag = False
-                # print("DEBUG port")
 
             # check if established
             if rule['established'] != packet['established'] and rule['established'] != 0:
                 flag = False
-                # print("DEBUG flag")
 
             # print result
             if flag:
@@ -188,6 +184,7 @@ class Firewall:
             else:
                 flag = True
 
+        # print dropped
         if no_match:
             msg = "drop() " + packet['direction'] + " " + packet['ip'] + " "
             msg += str(packet['port']) + " " + str(packet['established'])
@@ -210,9 +207,17 @@ class Firewall:
             if count -8 >= 0:
                 mask_binary.append(255)
                 count -= 8
+
+            # calculate number with remaining count
             else:
-                mask_binary.append(int(math.pow(2, count)))
-                count -=8
+                octet = 0
+
+                while count-1 >= 0:
+                    octet += math.pow(2,8-count)
+
+                    count -=1
+
+                mask_binary.append(int(octet))
 
         # add 0s
         while len(mask_binary) < 4:
@@ -244,13 +249,6 @@ class Firewall:
             # AND the mask and packet ip address
             pckt.append(pckt_ip[x] & rule_mask[x])
             rule_ip[x] = rule_ip[x] & rule_mask[x]
-
-        # print("DEBUG checking")
-        # if pckt != rule_ip:
-        #     print(pckt)
-        #     print(rule_ip)
-        #     print(rule_mask)
-        #     print("")
 
         # check if network portions are equal
         return pckt == rule_ip
