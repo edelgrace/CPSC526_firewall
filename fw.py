@@ -69,7 +69,7 @@ class Firewall:
         return flag
 
 
-    def rule_to_dict(self, rule):
+    def rule_to_dict(self, rule, count):
         """ Convert rule to dictionary """
 
         direction = str(rule[0])
@@ -83,10 +83,12 @@ class Firewall:
             established = 1
 
         # create a dict out of the the rule
-        dict = {'ip': ip,
+        dict = {'action': action,
+                'ip': ip,
                 'direction': direction,
                 'port': ports,
-                'established': established
+                'established': established,
+                'line': count
             }
 
         return dict
@@ -100,15 +102,17 @@ class Firewall:
             count = 0
 
             for line in file:
+
+                count += 1
+
                 # split line with whitespace
                 rule_data = line.strip().split()
 
                 # rule is valid
                 if  self.valid_rule(rule_data):
-                    count += 1
 
                     # add to rule list
-                    rule = self.rule_to_dict(rule_data)
+                    rule = self.rule_to_dict(rule_data, count)
                     self.RULES.append(rule)
 
                 # rule is not valid
@@ -143,34 +147,56 @@ class Firewall:
         """ check packet against rule """
 
         flag = True
+        no_match = True
 
         # go through each rule
         for rule in self.RULES:
             # check if same direction
             if rule['direction'] != packet['direction']:
+                # print("DEBUG direction")
                 flag = False
 
             # check if ip is in the rule
             if not self.check_ip(rule['ip'], packet['ip']):
                 flag = False
+                # print("DEBUG IP")
 
             # check if port is same
             if not self.check_port(rule['port'], packet['port']):
                 flag = False
+                # print("DEBUG port")
 
             # check if established
-            if not rule['established'] == packet['established']:
+            if rule['established'] != packet['established']:
                 flag = False
+                # print("DEBUG flag")
 
-        if flag:
+            # print result
+            if flag:
 
-            print("DEBUG match")
-        else:
-            print("no match")
+                msg = rule['action'] + "(" + str(rule['line']) + ") " + packet['direction'] 
+                msg += " " + packet['ip'] + " " + str(packet['port']) + " " + str(packet['established'])
+                msg += "\n"
 
+                sys.stdout.write(msg)
+            
+                no_match = False
 
-        print(rule)
-        print(packet)
+                break
+            else:
+                flag = True
+
+        if no_match:
+            msg = "drop() " + packet['direction'] + " " + packet['ip'] + " "
+            msg += str(packet['port']) + " " + str(packet['established'])
+            msg += "\n"
+
+            sys.stdout.write(msg)
+
+            # print(rule)
+            # print(packet)
+            # print("")
+
 
 
         return
@@ -234,11 +260,13 @@ class Firewall:
     def check_port(self, rule_port, pckt_port):
         """ Check ports """
 
-        if rule_port == "*":
+        # check if any ports used
+        if rule_port == ["*"]:
             return True
 
         ports = []
 
+        # convert ports to ints
         for port in rule_port:
             ports.append(int(port.strip()))
 
@@ -287,5 +315,8 @@ class Firewall:
 
 
 if __name__ == "__main__":
-    fw = Firewall()
-    fw.run()
+    try:
+        fw = Firewall()
+        fw.run()
+    except Exception as e:
+        sys.stderr.write("ERROR: " + str(e) + "\n")
