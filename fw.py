@@ -77,7 +77,7 @@ class Firewall:
         ip = str(rule[2])
         ports = str(rule[3]).split(",")
         
-        if established == rule[-1]:
+        if rule[-1] == rule[3]:
             established = 0
         else:
             established = 1
@@ -85,8 +85,8 @@ class Firewall:
         # create a dict out of the the rule
         dict = {'ip': ip,
                 'direction': direction,
-                'ports': ports,
-                'flag': established
+                'port': ports,
+                'established': established
             }
 
         return dict
@@ -133,7 +133,7 @@ class Firewall:
             'direction': direction,
             'ip': ip,
             'port': port,
-            'flag': flag    
+            'established': flag    
         }
 
         return dict
@@ -237,9 +237,12 @@ class Firewall:
         if rule_port == "*":
             return True
 
-        rule_port = rule_port.split(,)
+        ports = []
 
-        return pckt_port in rule_port
+        for port in rule_port:
+            ports.append(int(port.strip()))
+
+        return pckt_port in ports
 
 
     def ip_range(self, ip):
