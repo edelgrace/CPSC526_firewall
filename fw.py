@@ -35,6 +35,8 @@ class Firewall:
         if len(rule) > 5 or len(rule) < 4:
             return False
 
+        if rule[0] == "#":
+            return False
 
         direction = str(rule[0])
         action = str(rule[1])
@@ -57,6 +59,7 @@ class Firewall:
             
         # check if each port is good
         for port in ports:
+            
             if port == "*":
                 continue
             elif int(port) not in range(0,65535):
@@ -316,4 +319,4 @@ if __name__ == "__main__":
         fw = Firewall()
         fw.run()
     except Exception as e:
-        sys.stderr.write("ERROR: " + str(e) + "\n")
+        sys.stderr.write("ERROR: " + str(e))
