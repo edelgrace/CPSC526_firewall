@@ -137,17 +137,22 @@ class Firewall:
         if packet[0] == "#":
             return False
 
-        direction = str(packet[0])
-        ip = str(packet[1])
-        port = int(packet[2])
-        flag = int(packet[3])
+        # make a dictionary from the packet line
+        try:
+            direction = str(packet[0])
+            ip = str(packet[1])
+            port = int(packet[2])
+            flag = int(packet[3])
 
-        dict = {
-            'direction': direction,
-            'ip': ip,
-            'port': port,
-            'established': flag    
-        }
+            dict = {
+                'direction': direction,
+                'ip': ip,
+                'port': port,
+                'established': flag    
+            }
+        # print error
+        except Exception as e:
+            sys.stderr.write("Warning: Invalid packet " + str(e))
 
         return dict
 
