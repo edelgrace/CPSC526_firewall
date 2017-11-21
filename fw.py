@@ -130,6 +130,12 @@ class Firewall:
 
         # split packet
         packet = packet.strip().split()
+        
+        if len(packet) != 4:
+            return False
+            
+        if packet[0] == "#":
+            return False
 
         direction = str(packet[0])
         ip = str(packet[1])
@@ -308,8 +314,13 @@ class Firewall:
         for line in sys.stdin:
             # parse the line
             packet = self.parse_packet(line)
-
-            result = self.check_rule(packet)
+            
+            # check if packet was valid
+            if not packet:
+                sys.stderr.write("Warning: Invalid packet encountered")
+        
+            else:
+                result = self.check_rule(packet)
     
         return
 
